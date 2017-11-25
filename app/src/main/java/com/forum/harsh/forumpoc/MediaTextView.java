@@ -39,6 +39,7 @@ public class MediaTextView extends android.support.v7.widget.AppCompatTextView {
     private List<Call> networkCalls = new ArrayList<>();
     private Lock lock = new ReentrantLock();
     private Spannable s;
+    private boolean showError;
 
     public MediaTextView(Context context) {
         super(context);
@@ -50,6 +51,7 @@ public class MediaTextView extends android.support.v7.widget.AppCompatTextView {
 
     @Override
     public void setText(CharSequence text, BufferType type) {
+        showError = true;
         s = spannableFactory.newSpannable(text);
         loadImage(text);
         super.setText(s, BufferType.SPANNABLE);
@@ -63,6 +65,16 @@ public class MediaTextView extends android.support.v7.widget.AppCompatTextView {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (showError) {
+                                Toast.makeText(getContext(), "Error downloading images."
+                                        , Toast.LENGTH_SHORT).show();
+                                showError = false;
+                            }
+                        }
+                    });
                 }
 
                 @Override
